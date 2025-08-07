@@ -1,0 +1,10 @@
+uvicorn
+fastapi
+langchain_community
+langchain_huggingface
+ollama
+Jinja2
+sentence-transformers
+faiss-cpu
+unstructured
+"unstructured[md]"
