@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q&A Assistant</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <h1>Local Q&A Assistant</h1>
+    <form id="ask-form">
+        <input type="text" id="question" placeholder="Enter your question..." required>
+        <button type="submit">Ask</button>
+    </form>
+    <div class="sidebar">
+        <h3>Data Base</h3>
+        <hr>
+        <a id="add-file">Update Data</a>
+        <hr>
+        <div id="file-list">
+
+        </div>
+    </div>
+    <div id="response"></div>
+
+    <script>
+        async function loadFiles(generate = false) {
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = `<p>Loading...</p]>`
+
+            try {
+                const res = await fetch(`/load?b=${generate}`);
+                const data = await res.json();
+
+                fileList.innerHTML = data.files.length > 0 ? data.files.map(file => `<a>${file}</a>`).join('') : '<p>No files found</p>';
+            } catch (error) {
+                fileList.innerHTML = `<p style="color:red">Error loading files.</p>`;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => loadFiles(false));
+        document.getElementById('add-file').addEventListener('click', () => loadFiles(true))
+
+        document.getElementById('ask-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const question = document.getElementById('question').value;
+            const responseBox = document.getElementById('response');
+            responseBox.innerHTML = `Answering...`;
+
+            const res = await fetch(`/ask?q=${encodeURIComponent(question)}`);
+            const data = await res.json();
+            responseBox.innerHTML = `<p><strong>Answer:</strong> ${data.answer}</p>`;
+
+            if (data.sources.length > 0) {
+                responseBox.innerHTML += `<p><strong>Sources:</strong> <ul>` +
+                    data.sources.map(src => `<li>${src}</li>`).join('') + `</ul></p>`;
+            }
+        });
+    </script>
+</body>
+</html>
